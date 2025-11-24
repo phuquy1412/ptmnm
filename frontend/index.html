@@ -1,11 +1,343 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Quản lý sinh viên</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            margin-left: 10px;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .btn-edit {
+            background: #ffc107;
+            color: #333;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        .btn-delete:hover {
+            background: #c82333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .search-box {
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            table {
+                font-size: 12px;
+            }
+            button {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <H1>Hồ Phú Quý</H1>
+    <div class="container">
+        <h1>📚 Quản lý sinh viên</h1>
+
+        <div id="message" class="message"></div>
+
+        <!-- Form -->
+        <div class="form-section">
+            <h2>Thêm/Sửa sinh viên</h2>
+            <form id="form">
+                <input type="hidden" id="id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Họ tên:</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" id="email" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Số điện thoại:</label>
+                        <input type="tel" id="phone">
+                    </div>
+                    <div class="form-group">
+                        <label>Chuyên ngành:</label>
+                        <input type="text" id="major">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Lưu</button>
+                <button type="button" id="resetBtn" class="btn-secondary">Làm mới</button>
+            </form>
+        </div>
+
+        <!-- Danh sách -->
+        <h2>Danh sách sinh viên</h2>
+        <div class="search-box">
+            <input type="text" id="search" placeholder="🔍 Tìm kiếm...">
+        </div>
+        <table id="table">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Chuyên ngành</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const API = 'https://dh52201328.free.nf/php/sbackend/api.php';
+        
+        // Load data
+        function loadStudents() {
+            fetch(`${API}?action=list`)
+                .then(r => r.json())
+                .then(data => {
+                    if(data.success) {
+                        renderTable(data.data);
+                    }
+                });
+        }
+
+        // Render table
+        function renderTable(students) {
+            const tbody = document.getElementById('tbody');
+            const search = document.getElementById('search').value.toLowerCase();
+            
+            tbody.innerHTML = '';
+            let count = 1;
+            
+            students.filter(s => 
+                s.name.toLowerCase().includes(search) || 
+                s.email.toLowerCase().includes(search)
+            ).forEach(s => {
+                const row = `
+                    <tr>
+                        <td>${count++}</td>
+                        <td>${s.name}</td>
+                        <td>${s.email}</td>
+                        <td>${s.phone}</td>
+                        <td>${s.major}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editStudent(${s.id})">Sửa</button>
+                            <button class="btn-delete" onclick="deleteStudent(${s.id})">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Add/Edit
+        document.getElementById('form').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('id').value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const major = document.getElementById('major').value;
+
+            const action = id ? 'edit' : 'add';
+            const data = { name, email, phone, major };
+            if(id) data.id = id;
+
+            const res = await fetch(`${API}?action=${action}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            showMessage(result.message, result.success);
+            
+            if(result.success) {
+                document.getElementById('form').reset();
+                document.getElementById('id').value = '';
+                loadStudents();
+            }
+        };
+
+        // Edit
+        async function editStudent(id) {
+            const res = await fetch(`${API}?action=list`);
+            const data = await res.json();
+            const student = data.data.find(s => s.id == id);
+            
+            if(student) {
+                document.getElementById('id').value = student.id;
+                document.getElementById('name').value = student.name;
+                document.getElementById('email').value = student.email;
+                document.getElementById('phone').value = student.phone;
+                document.getElementById('major').value = student.major;
+                document.querySelector('input[type="text"]').focus();
+            }
+        }
+
+        // Delete
+        async function deleteStudent(id) {
+            if(confirm('Bạn chắc chắn muốn xóa?')) {
+                const res = await fetch(`${API}?action=delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                const result = await res.json();
+                showMessage(result.message, result.success);
+                loadStudents();
+            }
+        }
+
+        // Show message
+        function showMessage(msg, success) {
+            const el = document.getElementById('message');
+            el.textContent = msg;
+            el.className = 'message ' + (success ? 'success' : 'error');
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        // Reset form
+        document.getElementById('resetBtn').onclick = () => {
+            document.getElementById('form').reset();
+            document.getElementById('id').value = '';
+        };
+
+        // Search
+        document.getElementById('search').oninput = loadStudents;
+
+        // Load on start
+        loadStudents();
+    </script>
 </body>
 </html>
