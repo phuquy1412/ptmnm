@@ -25,4 +25,4 @@ jobs:
           php-version: '8.2' # Or whatever version you are using
 
       - name: Run PHP Lint
-        run: php -l frontend/index.php
+        run: php -l backend/api.php
