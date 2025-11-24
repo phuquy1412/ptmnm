@@ -14,14 +14,14 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v3
 
-
-    - name: Upload to Somee via FTP
+    - name: Deploy Frontend via FTP
       uses: SamKirkland/FTP-Deploy-Action@4.3.0
       with:
         server: dh52201328.somee.com
         username: quyh2ok
         password: Quyh2ttt@
-        local-dir: ./frontend
-        server-dir: /www.dh52201328.somee.com/
+        local-dir: ./frontend       # nội dung trong frontend
+        server-dir: /www.dh52201328.somee.com/   # upload trực tiếp vào root
         protocol: ftp
         port: 21
+        dry-run: false
