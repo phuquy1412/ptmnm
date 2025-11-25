@@ -52,7 +52,7 @@ if ($action === "add") {
             VALUES ('$name', '$email', '$phone', '$major')";
 
     if (mysqli_query($conn, $sql)) {
-        response(true, "Thêm sinh viên thành công");
+        response(true, "Thêm sinh viên thành côngggggggggggggggg");
     }
 
     response(false, "Thêm thất bại: " . mysqli_error($conn));
