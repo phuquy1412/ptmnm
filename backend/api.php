@@ -1,87 +1,106 @@
 <?php
-$host = 'localhost';
-$user = 'root';
-$pass = '';
-$db = 'student_management';
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type");
 
-$conn = new mysqli($host, $user, $pass, $db);
-$conn->set_charset("utf8");
+require_once "db.php";
 
-if ($conn->connect_error) {
-    die(json_encode(['success' => false, 'message' => 'Kết nối lỗi']));
+// Nhận action từ URL
+$action = $_GET['action'] ?? '';
+
+function response($success, $message, $data = null) {
+    echo json_encode([
+        "success" => $success,
+        "message" => $message,
+        "data" => $data
+    ]);
+    exit;
 }
 
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type');
+// Lấy dữ liệu JSON gửi từ JS
+$input = json_decode(file_get_contents("php://input"), true);
 
-$action = isset($_GET['action']) ? $_GET['action'] : '';
-$method = $_SERVER['REQUEST_METHOD'];
+// =============================
+// 📌 1. LẤY DANH SÁCH SINH VIÊN
+// =============================
+if ($action === "list") {
+    $sql = "SELECT * FROM students ORDER BY id DESC";
+    $result = mysqli_query($conn, $sql);
 
-switch($action) {
-    case 'list':
-        $result = $conn->query("SELECT * FROM students ORDER BY id DESC");
-        $students = [];
-        while($row = $result->fetch_assoc()) {
-            $students[] = $row;
-        }
-        echo json_encode(['success' => true, 'data' => $students]);
-        break;
+    $students = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $students[] = $row;
+    }
 
-    case 'add':
-        if($method == 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
-            $name = $conn->real_escape_string($data['name']);
-            $email = $conn->real_escape_string($data['email']);
-            $phone = $conn->real_escape_string($data['phone']);
-            $major = $conn->real_escape_string($data['major']);
-
-            $sql = "INSERT INTO students (name, email, phone, major) VALUES ('$name', '$email', '$phone', '$major')";
-            
-            if($conn->query($sql)) {
-                echo json_encode(['success' => true, 'message' => 'Thêm thành công']);
-            } else {
-                echo json_encode(['success' => false, 'message' => $conn->error]);
-            }
-        }
-        break;
-
-    case 'edit':
-        if($method == 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
-            $id = intval($data['id']);
-            $name = $conn->real_escape_string($data['name']);
-            $email = $conn->real_escape_string($data['email']);
-            $phone = $conn->real_escape_string($data['phone']);
-            $major = $conn->real_escape_string($data['major']);
-
-            $sql = "UPDATE students SET name='$name', email='$email', phone='$phone', major='$major' WHERE id=$id";
-            
-            if($conn->query($sql)) {
-                echo json_encode(['success' => true, 'message' => 'Cập nhật thành công']);
-            } else {
-                echo json_encode(['success' => false, 'message' => $conn->error]);
-            }
-        }
-        break;
-
-    case 'delete':
-        if($method == 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
-            $id = intval($data['id']);
-            
-            if($conn->query("DELETE FROM students WHERE id=$id")) {
-                echo json_encode(['success' => true, 'message' => 'Xóa thành công']);
-            } else {
-                echo json_encode(['success' => false, 'message' => $conn->error]);
-            }
-        }
-        break;
-
-    default:
-        echo json_encode(['success' => false, 'message' => 'Action không hợp lệ']);
+    response(true, "Lấy danh sách thành công", $students);
 }
 
-$conn->close();
+// =============================
+// 📌 2. THÊM SINH VIÊN
+// =============================
+if ($action === "add") {
+    if (!$input || !$input['name'] || !$input['email']) {
+        response(false, "Thiếu dữ liệu đầu vào");
+    }
+
+    $name = mysqli_real_escape_string($conn, $input['name']);
+    $email = mysqli_real_escape_string($conn, $input['email']);
+    $phone = mysqli_real_escape_string($conn, $input['phone']);
+    $major = mysqli_real_escape_string($conn, $input['major']);
+
+    $sql = "INSERT INTO students (name, email, phone, major) 
+            VALUES ('$name', '$email', '$phone', '$major')";
+
+    if (mysqli_query($conn, $sql)) {
+        response(true, "Thêm sinh viên thành công");
+    }
+
+    response(false, "Thêm thất bại: " . mysqli_error($conn));
+}
+
+// =============================
+// 📌 3. SỬA SINH VIÊN
+// =============================
+if ($action === "edit") {
+    if (!$input || !$input['id']) {
+        response(false, "Thiếu ID để sửa");
+    }
+
+    $id = intval($input['id']);
+    $name = mysqli_real_escape_string($conn, $input['name']);
+    $email = mysqli_real_escape_string($conn, $input['email']);
+    $phone = mysqli_real_escape_string($conn, $input['phone']);
+    $major = mysqli_real_escape_string($conn, $input['major']);
+
+    $sql = "UPDATE students 
+            SET name='$name', email='$email', phone='$phone', major='$major' 
+            WHERE id=$id";
+
+    if (mysqli_query($conn, $sql)) {
+        response(true, "Cập nhật sinh viên thành công");
+    }
+
+    response(false, "Sửa thất bại: " . mysqli_error($conn));
+}
+
+// =============================
+// 📌 4. XÓA SINH VIÊN
+// =============================
+if ($action === "delete") {
+    if (!$input || !$input['id']) {
+        response(false, "Thiếu ID để xóa");
+    }
+
+    $id = intval($input['id']);
+    $sql = "DELETE FROM students WHERE id=$id";
+
+    if (mysqli_query($conn, $sql)) {
+        response(true, "Xóa thành công");
+    }
+
+    response(false, "Xóa thất bại: " . mysqli_error($conn));
+}
+
+// Nếu action không hợp lệ
+response(false, "Action không hợp lệ");
 ?>
