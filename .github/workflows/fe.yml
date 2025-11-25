@@ -1,28 +1,26 @@
-# Frontend Workflow
-name: Frontend CI
+name: Frontend Deploy
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
     paths:
-      - 'frontend/**'
-  pull_request:
-    branches: [ "master" ]
-    paths:
-      - 'frontend/**'
+      - "frontend/**"
 
 jobs:
-  lint:
-    name: PHP Syntax Check
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+      - name: Upload frontend via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.3
         with:
-          php-version: '8.2' # Or whatever version you are using
-
-      - name: Run PHP Lint
-        run: php -l backend/api.php
+          server: ${{ secrets.FTP_SERVER}}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: frontend/
+          server-dir: /htdocs/

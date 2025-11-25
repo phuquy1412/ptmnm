@@ -1,29 +1,26 @@
-# Backend Workflow
-name: Backend CI
+name: Backend Deploy
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
     paths:
-      - 'backend/**'
-  pull_request:
-    branches: [ "master" ]
-    paths:
-      - 'backend/**'
+      - "backend/**"
 
 jobs:
-  lint:
-    name: PHP Syntax Check
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+      - name: Upload backend via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.3
         with:
-          php-version: '8.2' # Or whatever version you are using
-
-      - name: Run PHP Lint for all PHP files in backend
-        run: |
-          find backend -name "*.php" -print0 | xargs -0 -n1 php -l
+          server: ${{ secrets.FTP_SERVER}}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: backend/
+          server-dir: /htdocs/php/sbackend/
