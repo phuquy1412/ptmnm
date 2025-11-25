@@ -20,6 +20,6 @@ $sql = "CREATE TABLE IF NOT EXISTS students (
 )";
 
 $conn->query($sql);
-echo "Database và bảng đã được tạo!";
+echo "Database và bảng đã được tạoooooooo!";
 $conn->close();
 ?>
