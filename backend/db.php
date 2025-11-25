@@ -9,7 +9,7 @@ $conn = mysqli_connect($host, $user, $pass, $dbname);
 if (!$conn) {
     die(json_encode([
         "success" => false,
-        "message" => "Không kết nối được MySssssssssQL: " . mysqli_connect_error()
+        "message" => "Không kết nối được MySQL: " . mysqli_connect_error()
     ]));
 }
 
