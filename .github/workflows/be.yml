@@ -22,5 +22,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
-          local-dir: backend/
+          local-dir: sbackend/
           server-dir: /htdocs/php/sbackend/

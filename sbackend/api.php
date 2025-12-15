@@ -102,5 +102,5 @@ if ($action === "delete") {
 }
 
 // Nếu action không hợp lệ
-response(false, "Action khônggggg hợp lệ");
+response(false, "Action khônggggg hợppppp lệ");
 ?>
