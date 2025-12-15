@@ -95,12 +95,12 @@ if ($action === "delete") {
     $sql = "DELETE FROM students WHERE id=$id";
 
     if (mysqli_query($conn, $sql)) {
-        response(true, "Xóa thành công");
+        response(true, "Xóa thànhhhh công");
     }
 
     response(false, "Xóa thất bại: " . mysqli_error($conn));
 }
 
 // Nếu action không hợp lệ
-response(false, "Action không hợppppp lệ");
+response(false, "Action khônnnng hợppppp lệ");
 ?>
